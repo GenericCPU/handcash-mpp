@@ -1,4 +1,4 @@
-import type { CreatePaymentRequestData, PayData } from "@handcash/sdk";
+import type { PayData } from "@handcash/sdk";
 
 /**
  * Single fiat denomination for all HandCash MPP charges in this package.
@@ -53,6 +53,23 @@ export type ChargeSpecMnee = {
 
 export type ChargeSpec = ChargeSpecBsv | ChargeSpecMnee;
 
+/**
+ * JSON body for **`POST /v3/paymentRequests/`** (hosted HandCash Pay), before optional fields
+ * (`redirectUrl`, `notifications`, etc.).
+ */
+export type CreatePaymentRequestBody =
+  | {
+      instrumentCurrencyCode: "BSV";
+      denominationCurrencyCode: typeof STANDARD_CHARGE_DENOMINATION_CURRENCY;
+      product: ChargeProduct;
+      receivers: ChargeReceiver[];
+    }
+  | {
+      instrumentCurrencyCode: "MNEE";
+      product: ChargeProduct;
+      receivers: ChargeReceiver[];
+    };
+
 /** Same heuristic as HandCash Cloud `isPaymail`: any `@` in destination. */
 export function destinationLooksLikePaymail(destination: string): boolean {
   return destination.includes("@");
@@ -72,14 +89,12 @@ export function assertMneeReceiversHaveNoPaymail(receivers: ChargeReceiver[]): v
 }
 
 /**
- * Builds the exact `PaymentRequests.createPaymentRequest` body HandCash Cloud expects.
+ * JSON body for HandCash Cloud **`POST /v3/paymentRequests/`** (hosted HandCash Pay).
  *
  * - **BSV:** always sends `denominationCurrencyCode: USD` so `sendAmount` is a **USD quote** (continuity with MNEE pricing).
  * - **MNEE:** **never** sends `denominationCurrencyCode` (forbidden by Cloud); `sendAmount` values are passed through as MNEE numerics (see {@link ChargeReceiver.sendAmount}).
  */
-export function buildCreatePaymentRequestBodyFromCharge(
-  charge: ChargeSpec,
-): CreatePaymentRequestData["body"] {
+export function buildCreatePaymentRequestBodyFromCharge(charge: ChargeSpec): CreatePaymentRequestBody {
   const shared = {
     product: charge.product,
     receivers: charge.receivers,

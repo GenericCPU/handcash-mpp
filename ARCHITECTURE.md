@@ -35,7 +35,7 @@ This document describes the architecture for delivering **machine-native payment
         ┌───────────────────┴───────────────────┐
         ▼                                       ▼
 ┌───────────────┐                     ┌──────────────────────┐
-│ Connect.pay   │                     │ PaymentRequests      │
+│ Connect.pay   │                     │ POST /v3/paymentRequests/ │
 │ (authToken)   │                     │ → HandCash Pay URL │
 └───────────────┘                     └──────────────────────┘
         │                                       │
@@ -72,7 +72,7 @@ States are **logical**; persist only what your application needs.
 ### 4.B — **HandCash Pay** (hosted)
 
 - **When:** No `authToken`; need **hosted checkout** (human, cold start, QR, agent opens browser).
-- **Mechanism:** `PaymentRequests.createPaymentRequest` → `paymentRequestUrl` / QR; optional **webhook** on the payment request ties settlement back to `challengeId`.
+- **Mechanism:** HandCash Cloud **`POST /v3/paymentRequests/`** (app client) → `paymentRequestUrl` / QR; optional **webhook** on the payment request ties settlement back to `challengeId`.
 - **Mental model:** A **hosted payer URL** (browser redirect or QR) returned inside the **402** response so humans or agents can complete payment out of band, then your server learns completion via webhook or polling.
 
 ### 4.C — **Multi-receiver (split) payments**
@@ -131,7 +131,7 @@ Same **`ChargeSpec`** (including **§4.C** multi-receiver splits) can back **eit
 | `src/crypto/binding.ts` | Challenge IDs + HMAC binding. |
 | `src/http/payment-required.ts` | 402 JSON + `Response` helpers (Web Fetch API). |
 | `src/http/gate.ts` | Receipt JWT verification + optional replay guard + `runMachinePaidHandler`. |
-| `src/adapters/hosted-pay.ts` | **Real** `PaymentRequests.createPaymentRequest`. |
+| `src/adapters/hosted-pay.ts` | **Real** `POST /v3/paymentRequests/` via the app-scoped Hey API client. |
 | `src/adapters/payment-request-url.ts` | Normalizes legacy `pay.handcash.io/{id}` URLs to `handcash.io/payment-request/{id}?sid=…` for hosted checkout. |
 | `src/adapters/connect-pay.ts` | **Real** `Connect.pay`. |
 | `src/receipts/jwt.ts` | HS256 receipt JWT (`jose`). |

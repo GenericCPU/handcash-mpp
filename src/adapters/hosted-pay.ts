@@ -1,20 +1,37 @@
-import { PaymentRequests, type CreatePaymentRequestData } from "@handcash/sdk";
+import type { Client } from "@hey-api/client-fetch";
 import { canonicalizeHandCashPaymentRequestUrl } from "./payment-request-url.js";
-import { buildCreatePaymentRequestBodyFromCharge } from "../domain/instruments.js";
+import {
+  buildCreatePaymentRequestBodyFromCharge,
+  type CreatePaymentRequestBody,
+} from "../domain/instruments.js";
 import type { ChargeSpec } from "../domain/types.js";
 import type { HostedPayArtifact } from "../domain/types.js";
 
-type SdkClient = NonNullable<Parameters<typeof PaymentRequests.createPaymentRequest>[0]["client"]>;
+type CreatePaymentRequestHttpBody = CreatePaymentRequestBody & {
+  requestedUserData?: Array<"paymail" | "email" | "phoneNumber">;
+  paymentMethods?: Array<"onChain" | "externalPaymentProcessor">;
+  redirectUrl?: string;
+  notifications?: {
+    webhook?: { webhookUrl: string; customParameters?: Record<string, never> };
+    email?: string;
+  };
+};
+
+type CreatePaymentRequestSuccess = {
+  id: string;
+  paymentRequestUrl: string;
+  paymentRequestQrCodeUrl?: string;
+};
 
 export type CreateHostedPayOptions = {
   /** App-level client from `getInstance({ appId, appSecret }).client` */
-  client: SdkClient;
+  client: Client;
   charge: ChargeSpec;
   /** Tie Cloud webhooks back to your `challengeId`. */
   webhookUrl?: string;
   redirectUrl?: string;
-  requestedUserData?: CreatePaymentRequestData["body"]["requestedUserData"];
-  paymentMethods?: CreatePaymentRequestData["body"]["paymentMethods"];
+  requestedUserData?: CreatePaymentRequestHttpBody["requestedUserData"];
+  paymentMethods?: CreatePaymentRequestHttpBody["paymentMethods"];
 };
 
 /**
@@ -22,11 +39,13 @@ export type CreateHostedPayOptions = {
  * This acts as the hosted payment redirect URL inside a machine-pay flow.
  * When Cloud still returns **`pay.handcash.io/{id}`**, the checkout URL is rewritten to **`handcash.io/payment-request/{id}?sid=…`**
  * so the payer lands on the current public web checkout.
+ *
+ * Uses **`POST /v3/paymentRequests/`** on the app-scoped Hey API client (same route the full OpenAPI SDK exposes as `PaymentRequests.createPaymentRequest` where available).
  */
 export async function createHostedPayArtifact(
   opts: CreateHostedPayOptions,
 ): Promise<{ data: HostedPayArtifact | null; error: { message: string } | null }> {
-  const body: CreatePaymentRequestData["body"] = {
+  const body: CreatePaymentRequestHttpBody = {
     ...buildCreatePaymentRequestBodyFromCharge(opts.charge),
     ...(opts.requestedUserData ? { requestedUserData: opts.requestedUserData } : {}),
     ...(opts.paymentMethods ? { paymentMethods: opts.paymentMethods } : {}),
@@ -40,16 +59,25 @@ export async function createHostedPayArtifact(
       : {}),
   };
 
-  const { data, error } = await PaymentRequests.createPaymentRequest({
-    client: opts.client,
+  const { data: rawData, error } = await opts.client.post({
+    security: [
+      { name: "app-id", type: "apiKey" },
+      { name: "app-secret", type: "apiKey" },
+    ],
+    url: "/v3/paymentRequests/",
     body,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
+
+  const data = rawData as CreatePaymentRequestSuccess | undefined;
 
   if (error) {
     const msg =
       typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string"
         ? (error as { message: string }).message
-        : "PaymentRequests.createPaymentRequest failed";
+        : "Create payment request (POST /v3/paymentRequests/) failed";
     return { data: null, error: { message: msg } };
   }
 

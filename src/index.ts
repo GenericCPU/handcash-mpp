@@ -15,6 +15,7 @@ export type {
   MachineChargeIntent,
   ResourceRef,
 } from "./domain/types.js";
+export type { CreatePaymentRequestBody } from "./domain/instruments.js";
 export {
   assertMneeReceiversHaveNoPaymail,
   buildConnectPayBodyFromCharge,
