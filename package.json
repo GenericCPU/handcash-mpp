@@ -1,0 +1,48 @@
+{
+  "name": "@handcash/mpp",
+  "version": "0.2.0",
+  "description": "HandCash machine payments (402 challenges, HandCash Pay + Connect) on Bitcoin SV",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "ARCHITECTURE.md"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GenericCPU/handcash-mpp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GenericCPU/handcash-mpp/issues"
+  },
+  "homepage": "https://github.com/GenericCPU/handcash-mpp#readme",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/tests/*.js"
+  },
+  "dependencies": {
+    "jose": "^5.9.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "@handcash/sdk": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@handcash/sdk": "^1.0.2",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}
