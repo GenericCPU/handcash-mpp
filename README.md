@@ -4,6 +4,14 @@
 
 **HandCash Machine Payments** — HTTP **402** challenges, **HandCash Pay** (payment requests), **Connect.pay**, **receipt JWTs**, **webhook verification**, and a small **Request/Response gate** for paid APIs on **Bitcoin SV** via [`@handcash/sdk`](https://www.npmjs.com/package/@handcash/sdk).
 
+### Why an MPP server — and why now
+
+The **[Machine Payments Protocol](https://mpp.dev/)** (`MPP`) is shaping up as a **global, HTTP-native** way to sell **machine-accessible** resources: unpaid request → **402** + structured challenge → payer settles → **retry** the **same** request with a **receipt** (or credential) → **200** + payload. That is **good DX for agents, automation, and microservices** because the contract is **predictable** (status codes + JSON), not “scrape a checkout page and hope.”
+
+**Stripe** ships the same **402 / challenge / receipt** loop for **machine payments** on their rails (e.g. **shared payment tokens** and cards, or **crypto PaymentIntents** in their docs) — see **[Stripe MPP payments](https://docs.stripe.com/payments/machine/mpp)**. That is useful context: **serious payment infrastructure is converging on MPP-shaped flows**, not one-off paywalls.
+
+**`@handcash/mpp`** applies those **application-level standards** where settlement is **HandCash / BSV** instead: same **challenge + retry + receipt** discipline, with **HandCash Pay**, **Connect.pay**, and **receipt JWTs** wired for your routes. You stay aligned with the **emerging standard** while keeping a **HandCash-native** money path.
+
 **Multi-receiver splits:** `ChargeSpec.receivers` can list **many** payees (platform fee, creators, sellers, etc.) in **one** payment request or Connect pay—HandCash supports **high fan-out** (on the order of **up to 1000 receivers** per transaction). This library forwards your array as-is; confirm current Cloud limits in HandCash’s official docs for production.
 
 **Hosted pay vs Connect:** Same charge model; different **authorization** and **settlement plumbing**—hosted = payer completes **HandCash Pay** (URL/QR) and you usually learn via **webhook**; Connect = **`authToken`** then **`Connect.pay`** and you often get **`transactionId`** inline. Side-by-side table: **ARCHITECTURE.md §4.E** in the doc linked below.
