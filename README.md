@@ -6,6 +6,8 @@
 
 Design and Cloud rules: **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
 
+Runnable reference server: **[examples/handcash-mpp-demo/](./examples/handcash-mpp-demo/)** (see [examples/README.md](./examples/README.md)).
+
 ## Build
 
 ```bash

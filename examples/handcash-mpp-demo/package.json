@@ -1,0 +1,24 @@
+{
+  "name": "handcash-mpp-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo app showcasing @handcash/mpp (402, hosted pay, Connect.pay, receipts, webhooks)",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@handcash/mpp": "file:../..",
+    "@handcash/sdk": "^1.0.2",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
