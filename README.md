@@ -4,6 +4,8 @@
 
 **HandCash Machine Payments** — HTTP **402** challenges, **HandCash Pay** (payment requests), **Connect.pay**, **receipt JWTs**, **webhook verification**, and a small **Request/Response gate** for paid APIs on **Bitcoin SV** via [`@handcash/sdk`](https://www.npmjs.com/package/@handcash/sdk).
 
+**Multi-receiver splits:** `ChargeSpec.receivers` can list **many** payees (platform fee, creators, sellers, etc.) in **one** payment request or Connect pay—HandCash supports **high fan-out** (on the order of **up to 1000 receivers** per transaction). This library forwards your array as-is; confirm current Cloud limits in HandCash’s official docs for production.
+
 Design and Cloud rules: **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
 
 Runnable reference server: **[examples/handcash-mpp-demo/](./examples/handcash-mpp-demo/)** (see [examples/README.md](./examples/README.md)).

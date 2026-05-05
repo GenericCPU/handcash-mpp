@@ -75,11 +75,17 @@ States are **logical**; persist only what your application needs.
 - **Mechanism:** `PaymentRequests.createPaymentRequest` → `paymentRequestUrl` / QR; optional **webhook** on the payment request ties settlement back to `challengeId`.
 - **Mental model:** A **hosted payer URL** (browser redirect or QR) returned inside the **402** response so humans or agents can complete payment out of band, then your server learns completion via webhook or polling.
 
-### 4.C — **BSV vs MNEE** (Cloud contracts — read before calling the SDK)
+### 4.C — **Multi-receiver (split) payments**
+
+- **Model:** `ChargeSpec.receivers` is an array of `{ destination, sendAmount }` in **USD** (subject to the BSV vs MNEE rules in §4.D).
+- **HandCash Cloud:** One **payment request** or **Connect.pay** can split a single payer flow across **many** destinations in one settlement. High fan-out (on the order of **up to 1000 receivers** per transaction) is a supported HandCash pattern for royalties, marketplaces, and similar splits—confirm the exact current cap and any tier rules in **official HandCash / API documentation** before you rely on the maximum in production.
+- **This package:** Forwards your `receivers` through **`buildCreatePaymentRequestBodyFromCharge`** and **`buildConnectPayBodyFromCharge`** without imposing a smaller limit. You still own **sum checks**, **destination validation**, and **product policy** in your gateway.
+
+### 4.D — **BSV vs MNEE** (Cloud contracts — read before calling the SDK)
 
 HandCash exposes **two** on-chain instruments as `instrumentCurrencyCode`: **`BSV`** and **`MNEE`**. The OpenAPI types look symmetric, but **HandCash Cloud validators and use cases are not**. Internally the MNEE instrument is modeled as a **BSV21 USD token** while still advertising the code **`MNEE`** to apps (`instrumentRepository`, `instrumentCurrencyCodes`).
 
-**Product rule in this package:** **all pricing is expressed in USD** (`receivers[].sendAmount` as a dollar amount). The merchant only selects the **base instrument** (BSV vs MNEE). That gives one mental model across rails.
+**Product rule in this package:** **all pricing is expressed in USD** (`receivers[].sendAmount` as a dollar amount). The merchant only selects the **base instrument** (BSV vs MNEE). That gives one mental model across rails (including **§4.C** multi-receiver splits).
 
 | Surface | `instrumentCurrencyCode: 'BSV'` | `instrumentCurrencyCode: 'MNEE'` |
 |--------|-----------------------------------|-------------------------------------|
