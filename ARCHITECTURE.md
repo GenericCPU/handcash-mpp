@@ -14,7 +14,7 @@ This document describes the architecture for delivering **machine-native payment
 2. **HandCash SDK is the only BSV rail** — No parallel invented ledger APIs. `@handcash/sdk` is the system boundary to HandCash Cloud.
 3. **Connect vs HandCash Pay is a routing decision, not two products** — Same merchant-facing “charge”; different **credential** and **UX** path.
 4. **Lean gateway, fat cloud** — Cryptographic binding, idempotency keys, and replay safety live in **this package + your service**; money movement policy stays in **HandCash Cloud** (Connect, payment requests, webhooks).
-5. **Focused scope** — The architecture is currently designed specifically for HandCash integration. Additional adapters could be developed in the future to support multi-rail setups.
+5. **Focused scope** — This package targets HandCash integration only; it does not implement card rails or other payment networks.
 
 ## 2. Layer model
 
@@ -46,7 +46,7 @@ This document describes the architecture for delivering **machine-native payment
 
 ## 3. State machine (canonical)
 
-States are **logical**; persist only what your app needs (e.g. Redis + DB).
+States are **logical**; persist only what your application needs.
 
 | State | Meaning |
 |-------|---------|
@@ -117,13 +117,6 @@ This package encodes the payment-request half via **`buildCreatePaymentRequestBo
 | `src/idempotency/memory-store.ts` | In-process idempotency helper. |
 | `src/orchestrate/*` | Opinionated one-shots (402+hosted pay, Connect+receipt). |
 | `src/index.ts` | Public exports. |
-
-## 8. Roadmap (execution order)
-
-1. **Done (v1):** Hosted pay + Connect + receipts + gate + webhook verify + idempotency helper + tests.
-2. **Optional next:** `mpp.dev` wire-compatible challenge mode (feature flag).
-3. **Optional next:** Merchant-facing REST façade to reduce migration overhead from other systems.
-4. **Production hardening:** Redis-backed idempotency + replay guard; structured logging; rate limits on 402 minting.
 
 ---
 

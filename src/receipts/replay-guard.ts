@@ -1,6 +1,6 @@
 /**
- * Optional **single-use** guard for receipt JWT `jti` to reduce replay within process lifetime.
- * For production across instances use Redis SET NX with TTL matching JWT `exp`.
+ * Optional **single-use** guard for receipt JWT `jti` to reduce replay within a single process.
+ * For multiple instances, callers need their own shared deduplication aligned to JWT expiry; this class is in-memory only.
  */
 export class MemoryJwtReplayGuard {
   private readonly seen = new Map<string, number>();
