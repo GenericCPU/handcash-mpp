@@ -31,6 +31,12 @@ npm test
 
 `npm install` runs **`prepare`** and compiles **`dist/`** (requires `@handcash/sdk` from npm).
 
+## TypeScript: SDK `client` types
+
+When you first wire **`issuePaymentRequiredWithHostedPay`** or **`connectPayAndIssueReceipt`**, pass the HandCash **`client`** from **`getInstance({ appId, appSecret }).client`** or **`getAccountClient(authToken)`**. Across **`@handcash/sdk`** and **`@handcash/mpp`** versions, that value’s **TypeScript type** may not **structurally** match the narrow **`client`** type those helpers expect—even though it is correct at runtime.
+
+The **[examples/handcash-mpp-demo](examples/handcash-mpp-demo/)** server uses a small **`as unknown as`** cast to the parameter type in both places (hosted pay and Connect pay). Mirror that pattern from [`examples/handcash-mpp-demo/src/server.ts`](examples/handcash-mpp-demo/src/server.ts) when you add your first **402** route.
+
 ## Surface area (v1)
 
 | Area | Exports |
