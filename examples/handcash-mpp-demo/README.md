@@ -27,6 +27,8 @@ npm install
 npm start
 ```
 
+**Headless agent:** see **[AGENTS.md](./AGENTS.md)**. `npm run agent` waits for payment + webhook; `npm run agent:challenge` dumps the **402** JSON once (good for Cursor); `npm run agent:premium` with **`MPP_RECEIPT_JWT`** dumps the unlocked **200** JSON once.
+
 ## Environment
 
 | Variable | Purpose |

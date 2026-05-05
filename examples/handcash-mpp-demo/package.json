@@ -6,6 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",
+    "agent": "tsx scripts/agent.ts",
+    "agent:challenge": "tsx scripts/agent.ts challenge",
+    "agent:premium": "tsx scripts/agent.ts premium",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
