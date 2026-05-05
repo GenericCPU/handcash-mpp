@@ -67,13 +67,13 @@ States are **logical**; persist only what your application needs.
 
 - **When:** Caller already has **HandCash Connect** `authToken` (user or agent delegated).
 - **Mechanism:** `Connect.pay` with receivers and amounts — same as instant payments in the SDK; use **`denominationCurrencyCode: 'USD'`** here to match this package’s pricing rule.
-- **Analogy:** Similar to tokenized payment flows where a second request carries spend authority, except the authority here is an OAuth-style session with HandCash.
+- **Mental model:** A follow-up call carries **spend authority** already delegated to your app via the wallet provider’s session (HandCash Connect `authToken`), rather than card PAN entry on each charge.
 
 ### 4.B — **HandCash Pay** (hosted)
 
 - **When:** No `authToken`; need **hosted checkout** (human, cold start, QR, agent opens browser).
 - **Mechanism:** `PaymentRequests.createPaymentRequest` → `paymentRequestUrl` / QR; optional **webhook** on the payment request ties settlement back to `challengeId`.
-- **Analogy:** A hosted Checkout Session or Payment Link surfaced inside a **402** machine flow.
+- **Mental model:** A **hosted payer URL** (browser redirect or QR) returned inside the **402** response so humans or agents can complete payment out of band, then your server learns completion via webhook or polling.
 
 ### 4.C — **BSV vs MNEE** (Cloud contracts — read before calling the SDK)
 

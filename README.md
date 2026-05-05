@@ -40,6 +40,18 @@ npm test
 
 **Connect path:** **`connectPayAndIssueReceipt`** after the user has an **`authToken`**.
 
+## Production readiness
+
+For integrations that move real value, treat the following as baseline hygiene. This package supplies primitives; **wiring and persistence are your responsibility**.
+
+- **Webhook authenticity:** Act only on payloads that pass **`verifyPaymentRequestCompletedWebhook`** using your HandCash app secret. Reject missing or invalid signatures before mutating state.
+- **Idempotent fulfillment:** The same `paymentRequestId` or completion notification may arrive more than once. Your handlers must not double-grant entitlements, decrement inventory twice, or persist duplicate “paid” rows keyed only by delivery attempt.
+- **Receipt replay:** Pair **`evaluateMachinePaymentGate`** with **`MemoryJwtReplayGuard`** when a receipt JWT must not unlock the same resource repeatedly within a short window. For more than one application process, replace the in-memory guard with **shared** storage keyed by JWT **`jti`** (or equivalent), with TTL aligned to receipt lifetime.
+- **Idempotency keys:** Generate stable keys for payment-request creation and wallet debits where HandCash Cloud or your gateway accepts them, so client or intermediary retries cannot create parallel charges.
+- **Secrets:** Keep `receiptSecret`, challenge-binding `serverSecret`, and app credentials out of source control; rotate on compromise. Serve webhook endpoints over HTTPS.
+
+See **[SECURITY.md](./SECURITY.md)** for how to report vulnerabilities in this package.
+
 ## Dependencies
 
 - **Runtime:** `jose` (HS256 receipts), `@handcash/sdk` (peer).

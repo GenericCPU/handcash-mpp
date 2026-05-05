@@ -14,7 +14,18 @@
   "files": [
     "dist",
     "README.md",
-    "ARCHITECTURE.md"
+    "ARCHITECTURE.md",
+    "SECURITY.md"
+  ],
+  "keywords": [
+    "handcash",
+    "bsv",
+    "bitcoin-sv",
+    "402",
+    "machine-payments",
+    "payment-request",
+    "webhook",
+    "connect"
   ],
   "license": "MIT",
   "repository": {
