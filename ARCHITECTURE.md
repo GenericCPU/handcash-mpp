@@ -95,6 +95,22 @@ HandCash exposes **two** on-chain instruments as `instrumentCurrencyCode`: **`BS
 
 This package encodes the payment-request half via **`buildCreatePaymentRequestBodyFromCharge`** (always `USD` for BSV; omits denomination for MNEE) and exposes **`assertMneeReceiversHaveNoPaymail`** for the Connect paymail rule. When you add the Connect adapter, call the assertion before `Connect.pay` for MNEE.
 
+### 4.E — **HandCash Pay (hosted) vs Connect — comparison**
+
+Same **`ChargeSpec`** (including **§4.C** multi-receiver splits) can back **either** path. The difference is **who authorizes spend** and **how your server learns the money moved**.
+
+| | **HandCash Pay (hosted)** | **Connect (`Connect.pay`)** |
+|--|---------------------------|------------------------------|
+| **Credential on pay** | None from the payer to your API beyond opening the **hosted** URL / QR. Your server uses **app** credentials only to **create** the payment request. | Payer (or agent) must have completed **Connect**; your server holds an **`authToken`** for that identity when calling **`Connect.pay`**. |
+| **Payer UX** | Browser redirect, QR, or handoff—good for **cold start**, guests, or devices where Connect is not set up. | Popup / redirect to **authorize the wallet**, then programmatic pay—good for **signed-in** users and **repeat** purchases. |
+| **How settlement reaches you** | Typically **asynchronous**: **webhook** (and/or client return URL + **polling**). You verify the webhook and then **`issueReceiptJwt`**. | Often **synchronous**: **`connectPayAndIssueReceipt`** returns **`transactionId`** and receipt in the **same** server round-trip (still persist idempotently). |
+| **Infra you expose** | **`webhookUrl`** must be reachable by HandCash Cloud (or you use a dev-only substitute). **`redirectUrl`** may need allowlisting in the dashboard. | **Connect callback** URL for OAuth-style return; protect **`authToken`** in transit and at rest; least-privilege **Connect app** permissions. |
+| **Who “pushes” the payment** | The **payer** completes checkout on HandCash’s hosted surface. | Your **server** calls **`Connect.pay`** with the user’s delegated authority (after they’ve connected). |
+| **Splits / fan-out** | Full **`receivers[]`** on the payment request. | Full **`receivers[]`** on Connect pay (same MNEE paymail rules as **§4.D**). |
+| **Trade-off summary** | Less integration for the payer (no Connect app install/session), more **async** plumbing on your side (webhooks, retries, idempotency). | Smoother **in-app** or **API** debit once connected; you must **safely handle** session tokens and session lifecycle. |
+
+**Product rule:** For a **single** `challengeId`, pick **one** fulfillment path per business transaction—completing **both** hosted pay and Connect pay for the same challenge means **paying twice** unless your product explicitly models that.
+
 ## 5. HTTP surface
 
 - **402** + `Content-Type: application/json` body following the **problem payment required** pattern (referencing the MPP docs for field names such as `challengeId`).
