@@ -1,6 +1,6 @@
 {
   "name": "@handcash/mpp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "HandCash machine payments (402 challenges, HandCash Pay + Connect) on Bitcoin SV",
   "type": "module",
   "main": "./dist/index.js",

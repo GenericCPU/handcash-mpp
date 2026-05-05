@@ -29,6 +29,7 @@ export {
   type PaymentRequiredBody,
 } from "./http/payment-required.js";
 export { createHostedPayArtifact, type CreateHostedPayOptions } from "./adapters/hosted-pay.js";
+export { canonicalizeHandCashPaymentRequestUrl } from "./adapters/payment-request-url.js";
 export { executeConnectPay, type ExecuteConnectPayOptions } from "./adapters/connect-pay.js";
 export { issueReceiptJwt, verifyReceiptJwt, type VerifiedReceipt } from "./receipts/jwt.js";
 export { MemoryJwtReplayGuard } from "./receipts/replay-guard.js";

@@ -1,4 +1,5 @@
 import { PaymentRequests, type CreatePaymentRequestData } from "@handcash/sdk";
+import { canonicalizeHandCashPaymentRequestUrl } from "./payment-request-url.js";
 import { buildCreatePaymentRequestBodyFromCharge } from "../domain/instruments.js";
 import type { ChargeSpec } from "../domain/types.js";
 import type { HostedPayArtifact } from "../domain/types.js";
@@ -19,6 +20,8 @@ export type CreateHostedPayOptions = {
 /**
  * HandCash Pay: creates a **payment request** and returns URLs for the 402 `handcash` extension.
  * This acts as the hosted payment redirect URL inside a machine-pay flow.
+ * When Cloud still returns **`pay.handcash.io/{id}`**, the checkout URL is rewritten to **`handcash.io/payment-request/{id}?sid=…`**
+ * so the payer lands on the current public web checkout.
  */
 export async function createHostedPayArtifact(
   opts: CreateHostedPayOptions,
@@ -54,11 +57,13 @@ export async function createHostedPayArtifact(
     return { data: null, error: { message: "Missing paymentRequest id or paymentRequestUrl in response" } };
   }
 
+  const paymentRequestUrl = canonicalizeHandCashPaymentRequestUrl(data.paymentRequestUrl);
+
   return {
     data: {
       fulfillment: "hosted_pay",
       paymentRequestId: data.id,
-      paymentRequestUrl: data.paymentRequestUrl,
+      paymentRequestUrl,
       ...(data.paymentRequestQrCodeUrl
         ? { paymentRequestQrCodeUrl: data.paymentRequestQrCodeUrl }
         : {}),

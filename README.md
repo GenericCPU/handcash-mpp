@@ -24,7 +24,7 @@ npm test
 | **Money** | `ChargeSpec` / `ChargeSpecBsv` / `ChargeSpecMnee`, `STANDARD_CHARGE_DENOMINATION_CURRENCY` (`USD`), `buildCreatePaymentRequestBodyFromCharge`, `buildConnectPayBodyFromCharge`, `assertMneeReceiversHaveNoPaymail` |
 | **402** | `buildPaymentRequiredBody`, `paymentRequiredResponse` |
 | **Challenges** | `createChallengeId`, `hmacBindChallenge` |
-| **HandCash Pay** | `createHostedPayArtifact`, `issuePaymentRequiredWithHostedPay` |
+| **HandCash Pay** | `createHostedPayArtifact`, `issuePaymentRequiredWithHostedPay`, `canonicalizeHandCashPaymentRequestUrl` |
 | **Connect** | `executeConnectPay`, `connectPayAndIssueReceipt` |
 | **Receipts** | `issueReceiptJwt`, `verifyReceiptJwt`, `MemoryJwtReplayGuard` |
 | **HTTP gate** | `evaluateMachinePaymentGate`, `runMachinePaidHandler`, `readReceiptTokenFromRequest`, `DEFAULT_RECEIPT_HEADER` |

@@ -110,6 +110,7 @@ This package encodes the payment-request half via **`buildCreatePaymentRequestBo
 | `src/http/payment-required.ts` | 402 JSON + `Response` helpers (Web Fetch API). |
 | `src/http/gate.ts` | Receipt JWT verification + optional replay guard + `runMachinePaidHandler`. |
 | `src/adapters/hosted-pay.ts` | **Real** `PaymentRequests.createPaymentRequest`. |
+| `src/adapters/payment-request-url.ts` | Normalizes legacy `pay.handcash.io/{id}` URLs to `handcash.io/payment-request/{id}?sid=…` for hosted checkout. |
 | `src/adapters/connect-pay.ts` | **Real** `Connect.pay`. |
 | `src/receipts/jwt.ts` | HS256 receipt JWT (`jose`). |
 | `src/receipts/replay-guard.ts` | In-process `jti` replay window. |
