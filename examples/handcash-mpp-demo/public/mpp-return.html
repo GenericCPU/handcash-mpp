@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment complete</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f1419; color: #e7ecf3; margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem; text-align: center; }
+    p { margin: 0.5rem 0; max-width: 22rem; line-height: 1.5; }
+    a { color: #6ec3ff; }
+  </style>
+</head>
+<body>
+  <div>
+    <p><strong>Returning to the demo…</strong></p>
+    <p id="hint">You can close this window if it does not close automatically.</p>
+  </div>
+  <script>
+    (function () {
+      var key = "handcash_mpp_demo_pending";
+      var pid = null;
+      try {
+        var raw = localStorage.getItem(key);
+        if (raw) {
+          var o = JSON.parse(raw);
+          pid = o && o.paymentRequestId ? String(o.paymentRequestId) : null;
+          localStorage.removeItem(key);
+        }
+      } catch (e) {}
+      try { localStorage.setItem("handcash_mpp_demo_return_ts", String(Date.now())); } catch (e) {}
+      var origin = window.location.origin;
+      if (window.opener && !window.opener.closed) {
+        try { window.opener.postMessage({ type: "handcash-mpp-return", paymentRequestId: pid }, origin); } catch (e) {}
+        setTimeout(function () {
+          try { window.close(); } catch (e) {}
+          var h = document.getElementById("hint");
+          if (h) h.textContent = "Close this tab and return to the demo.";
+        }, 400);
+      } else {
+        var h = document.getElementById("hint");
+        if (h) h.innerHTML = "Use <strong>Poll</strong> on the demo, or <a href=\"/\">go home</a>.";
+      }
+    })();
+  </script>
+</body>
+</html>

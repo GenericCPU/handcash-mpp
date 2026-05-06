@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@handcash/mpp demo</title>
+  <link rel="stylesheet" href="/demo.css" />
+</head>
+<body>
+  <h1>@handcash/mpp demo</h1>
+  <p class="sub">402 → pay (hosted or Connect) → receipt JWT → same GET with <code>x-handcash-receipt</code>. One pay path per challenge.</p>
+
+  <section>
+    <h2>Challenge</h2>
+    <div class="row">
+      <button type="button" id="btnRequest">GET /api/premium</button>
+    </div>
+    <pre id="outRequest">—</pre>
+    <p class="meta"><code>challengeId</code> <code id="challengeOut">—</code></p>
+  </section>
+
+  <section>
+    <h2>Pay</h2>
+    <p id="payHint" class="meta">Request a challenge first.</p>
+    <h3>Hosted</h3>
+    <div class="row">
+      <button type="button" class="btn-pay" id="btnPay" disabled>Open HandCash Pay</button>
+      <button type="button" id="btnQr" disabled title="QR">QR</button>
+    </div>
+    <div id="qrWrap"><img id="payQrImg" alt="Checkout QR" width="112" height="112" /></div>
+    <h3>Wallet (Connect)</h3>
+    <div class="row">
+      <button type="button" class="btn-pay" id="btnConnectAuth">Connect</button>
+      <button type="button" class="btn-pay" id="btnConnectPay" disabled>Pay <span id="amt">—</span></button>
+    </div>
+    <p id="authLine" class="meta">Wallet: not connected.</p>
+  </section>
+
+  <section>
+    <h2>Receipt &amp; retry</h2>
+    <p class="meta">Hosted: poll after webhook. Wallet: receipt from Pay response.</p>
+    <div class="row">
+      <button type="button" id="btnPoll" disabled>Poll</button>
+      <button type="button" id="btnRetry" disabled>GET /api/premium + receipt</button>
+    </div>
+    <pre id="outReceipt">—</pre>
+    <pre id="outRetry">—</pre>
+  </section>
+
+  <script src="/demo.js"></script>
+</body>
+</html>

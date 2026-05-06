@@ -2,15 +2,16 @@
 
 > **Note:** This is an unofficial, open-source demo project and is not affiliated with or endorsed by HandCash.
 
-Small runnable app (lives under **`examples/`** in this repo) that shows **`@handcash/mpp`** end to end:
+Small runnable app (lives under **`examples/`** in this repo) that shows **`@handcash/mpp`** end to end. The browser UI is static assets in **`public/`** (`index.html`, `demo.js`, `demo.css`); **`src/server.ts`** is mostly JSON routes and webhooks.
 
-1. **`GET /api/premium`** — returns **402** + HandCash Pay artifact (or **200** with a valid **`x-handcash-receipt`** JWT). The gate uses **`MemoryJwtReplayGuard`** (replay TTL in code).
-2. **`POST /webhooks/payment`** — HandCash Cloud calls this after **hosted** payment; the demo verifies **`appSecret`** and mints the receipt JWT.
-3. **`GET /api/receipt?paymentRequestId=…`** — poll until the receipt is ready (**hosted** path).
-4. **`GET /api/connect-auth-url`** — JSON with HandCash Connect authorization URL (popup flow).
-5. **`POST /api/connect-pay`** — body `{ "authToken", "challengeId" }`; runs **`connectPayAndIssueReceipt`** and returns **`receiptJwt`** (no webhook for that path).
-6. **`GET /connect/callback`** — Connect redirect target; **`postMessage`** to the opener with **`authToken`** (popup flow).
-7. **`POST /demo/complete`** — local-only substitute when HandCash cannot reach your laptop (see below).
+1. **`GET /`** — demo page (static HTML + JS).
+2. **`GET /api/premium`** — returns **402** + HandCash Pay artifact (or **200** with a valid **`x-handcash-receipt`** JWT). The gate uses **`MemoryJwtReplayGuard`** (replay TTL in code).
+3. **`POST /webhooks/payment`** — HandCash Cloud calls this after **hosted** payment; the demo verifies **`appSecret`** and mints the receipt JWT.
+4. **`GET /api/receipt?paymentRequestId=…`** — poll until the receipt is ready (**hosted** path).
+5. **`GET /api/connect-auth-url`** — JSON with HandCash Connect authorization URL (popup flow).
+6. **`POST /api/connect-pay`** — body `{ "authToken", "challengeId" }`; runs **`connectPayAndIssueReceipt`** and returns **`receiptJwt`** (no webhook for that path).
+7. **`GET /connect/callback`** — Connect redirect target; **`postMessage`** to the opener with **`authToken`** (popup flow).
+8. **`POST /demo/complete`** — local-only substitute when HandCash cannot reach your laptop (see below). **Disabled when `NODE_ENV=production`** unless you set **`ALLOW_DEMO_COMPLETE=1`** (unsafe for real money; do not enable on public hosts).
 
 Open **http://localhost:3456/** and use the on-page flow. Prefer **either** hosted pay **or** Connect for a given 402 — completing both pays twice.
 
@@ -21,8 +22,7 @@ Keep secrets in **`.env`** only (gitignored). Commit **`.env.example`** updates 
 ```bash
 cd handcash-mpp/examples/handcash-mpp-demo
 cp .env.example .env
-# Edit .env — required: HANDCASH_APP_ID, HANDCASH_APP_SECRET, DEMO_RECEIVER_HANDLE,
-# MPP_RECEIPT_SECRET, MPP_SERVER_SECRET, DEMO_COMPLETE_SECRET
+# Edit .env — see .env.example (required vs optional). Set DEMO_COMPLETE_SECRET if you use POST /demo/complete locally.
 npm install
 npm start
 ```
@@ -41,6 +41,8 @@ npm start
 | `PAY_REDIRECT_URL` | Optional. Where HandCash redirects the browser after **hosted** pay (default `{PUBLIC_BASE_URL}/mpp/return`). Use your tunnel URL in dev when redirects are allowlisted. |
 | `CONNECT_CALLBACK_URL` | Optional. Where the browser lands after **Connect** authorization (default `{PUBLIC_BASE_URL}/connect/callback`). Must match the authorization success URL in the HandCash dashboard. For Connect.pay, the Connect app needs the **Payment** permission. |
 | `DEMO_COMPLETE_SECRET` | Header `x-demo-complete-secret` for **`POST /demo/complete`** |
+| `NODE_ENV` | Set to **`production`** only for hardened deploys; see **`ALLOW_DEMO_COMPLETE`** below. |
+| `ALLOW_DEMO_COMPLETE` | Set to **`1`** to re-enable **`POST /demo/complete`** under **`NODE_ENV=production`** (discouraged). |
 | `PORT` | HTTP port (default `3456`) |
 
 ## Local webhook workaround

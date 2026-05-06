@@ -18,6 +18,8 @@ The **[Machine Payments Protocol](https://mpp.dev/)** (`MPP`) is shaping up as a
 
 Design and Cloud rules: **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
 
+Industry context (402 / MPP meta, Stripe machine payments, positioning): **[STRATEGIC_OVERVIEW.md](./STRATEGIC_OVERVIEW.md)**.
+
 Runnable reference server: **[examples/handcash-mpp-demo/](./examples/handcash-mpp-demo/)** (see [examples/README.md](./examples/README.md)).
 
 ## Build
@@ -50,6 +52,7 @@ The **[examples/handcash-mpp-demo](examples/handcash-mpp-demo/)** server uses a 
 | **HTTP gate** | `evaluateMachinePaymentGate`, `runMachinePaidHandler`, `readReceiptTokenFromRequest`, `DEFAULT_RECEIPT_HEADER` |
 | **Webhooks** | `verifyPaymentRequestCompletedWebhook` (body `appSecret` from Cloud) |
 | **Idempotency** | `MemoryIdempotencyStore`, `IdempotencyStore` |
+| **Secrets hygiene** | `assertMinMppSecretLength`, `DEFAULT_MIN_MPP_SECRET_LENGTH` |
 
 ## Minimal flow (hosted pay)
 
@@ -68,7 +71,8 @@ For integrations that move real value, treat the following as baseline hygiene. 
 - **Idempotent fulfillment:** The same `paymentRequestId` or completion notification may arrive more than once. Your handlers must not double-grant entitlements, decrement inventory twice, or persist duplicate “paid” rows keyed only by delivery attempt.
 - **Receipt replay:** Pair **`evaluateMachinePaymentGate`** with **`MemoryJwtReplayGuard`** when a receipt JWT must not unlock the same resource repeatedly within a short window. For more than one application process, replace the in-memory guard with **shared** storage keyed by JWT **`jti`** (or equivalent), with TTL aligned to receipt lifetime.
 - **Idempotency keys:** Generate stable keys for payment-request creation and wallet debits where HandCash Cloud or your gateway accepts them, so client or intermediary retries cannot create parallel charges.
-- **Secrets:** Keep `receiptSecret`, challenge-binding `serverSecret`, and app credentials out of source control; rotate on compromise. Serve webhook endpoints over HTTPS.
+- **Secrets:** Keep `receiptSecret`, challenge-binding `serverSecret`, and app credentials out of source control; rotate on compromise. Serve webhook endpoints over HTTPS. Prefer **long random** values (e.g. `openssl rand -base64 32`); you can enforce a minimum length at startup with **`assertMinMppSecretLength`** from this package.
+- **Demo vs production:** If you start from **`examples/handcash-mpp-demo`**, treat **`POST /demo/complete`** as **local development only** (it simulates a paid webhook). That route is **disabled when `NODE_ENV=production`** unless you set **`ALLOW_DEMO_COMPLETE=1`** (not recommended for real money). Remove or guard any similar shortcuts in your own fork.
 
 See **[SECURITY.md](./SECURITY.md)** for how to report vulnerabilities in this package.
 

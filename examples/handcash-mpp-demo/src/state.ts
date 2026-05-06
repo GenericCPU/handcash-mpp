@@ -1,25 +1,41 @@
 import type { ResourceRef } from "@handcash/mpp";
 
-export type PendingPayment = {
+/** One in-memory row per active 402 (hosted `paymentRequestId` + same `challengeId` for Connect). */
+export type PremiumSession = {
   challengeId: string;
+  paymentRequestId: string;
   resource: ResourceRef;
+  receiptJwt?: string;
 };
 
-/** paymentRequestId → pending challenge (cleared after receipt issued) */
-export const pendingByPaymentRequestId = new Map<string, PendingPayment>();
+const byPaymentRequestId = new Map<string, PremiumSession>();
+const byChallengeId = new Map<string, PremiumSession>();
 
-/** paymentRequestId → receipt JWT (for demo UI to poll after hosted pay) */
-export const receiptJwtByPaymentRequestId = new Map<string, string>();
+export function registerPremiumSession(s: PremiumSession): void {
+  byPaymentRequestId.set(s.paymentRequestId, s);
+  byChallengeId.set(s.challengeId, s);
+}
 
-/** challengeId → same resource as hosted 402 (for Connect.pay path) */
-export const pendingConnectByChallengeId = new Map<string, { resource: ResourceRef }>();
+export function getSessionForPaymentRequest(id: string): PremiumSession | undefined {
+  return byPaymentRequestId.get(id);
+}
 
-/** challengeId → hosted paymentRequestId (clear Connect path when either path completes) */
-export const challengeIdToHostedPaymentRequestId = new Map<string, string>();
+export function getSessionForChallenge(challengeId: string): PremiumSession | undefined {
+  return byChallengeId.get(challengeId);
+}
 
-export function clearPendingForChallenge(challengeId: string): void {
-  pendingConnectByChallengeId.delete(challengeId);
-  const pid = challengeIdToHostedPaymentRequestId.get(challengeId);
-  if (pid) pendingByPaymentRequestId.delete(pid);
-  challengeIdToHostedPaymentRequestId.delete(challengeId);
+/** Hosted path settled (webhook or demo/complete): store JWT; drop Connect eligibility for this challenge. */
+export function setHostedReceipt(paymentRequestId: string, receiptJwt: string): void {
+  const s = byPaymentRequestId.get(paymentRequestId);
+  if (!s) return;
+  s.receiptJwt = receiptJwt;
+  byChallengeId.delete(s.challengeId);
+}
+
+/** Connect path: client already has JWT — remove row so hosted poll does not see stale state. */
+export function clearSessionAfterConnect(challengeId: string): void {
+  const s = byChallengeId.get(challengeId);
+  if (!s) return;
+  byChallengeId.delete(challengeId);
+  byPaymentRequestId.delete(s.paymentRequestId);
 }

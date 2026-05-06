@@ -34,7 +34,7 @@ Stdout is the **200** JSON from `GET /api/premium`. Exit non-zero if missing JWT
 npm run agent
 ```
 
-Polls `/api/receipt` until the webhook fires (requires **`PUBLIC_BASE_URL`** reachable by HandCash, or use **`POST /demo/complete`** locally).
+Polls `/api/receipt` until the webhook fires (requires **`PUBLIC_BASE_URL`** reachable by HandCash, or use **`POST /demo/complete`** locally — that route is **off** when **`NODE_ENV=production`** unless **`ALLOW_DEMO_COMPLETE=1`**).
 
 ## Curl equivalents (no Node)
 

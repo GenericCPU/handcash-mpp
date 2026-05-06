@@ -25,6 +25,10 @@ export {
 } from "./domain/instruments.js";
 export { createChallengeId, hmacBindChallenge } from "./crypto/binding.js";
 export {
+  assertMinMppSecretLength,
+  DEFAULT_MIN_MPP_SECRET_LENGTH,
+} from "./crypto/secrets.js";
+export {
   buildPaymentRequiredBody,
   paymentRequiredResponse,
   type PaymentRequiredBody,
