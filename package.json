@@ -39,7 +39,6 @@
   "homepage": "https://github.com/GenericCPU/handcash-mpp#readme",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/tests/*.js"
   },
@@ -53,7 +52,7 @@
     "@handcash/sdk": ">=1.0.0"
   },
   "devDependencies": {
-    "@handcash/sdk": "^1.0.2",
+    "@handcash/sdk": "^1.0.3",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.2"
   }
