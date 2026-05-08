@@ -31,7 +31,7 @@ npm install
 npm test
 ```
 
-`npm install` runs **`prepare`** and compiles **`dist/`** (requires `@handcash/sdk` from npm).
+**`dist/`** is **committed** so `git+https://…` / Vercel installs resolve the package without running a post-clone build. After changing `src/`, run **`npm run build`** and commit the updated **`dist/`** before pushing.
 
 ## TypeScript: SDK `client` types
 
