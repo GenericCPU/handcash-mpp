@@ -5,8 +5,10 @@
  */
 export type { EntitlementState, FulfillmentKind } from "./domain/lifecycle.js";
 export type { ChargeProduct, ChargeReceiver, ChargeSpec, ChargeSpecBsv, ChargeSpecMnee, HostedPayArtifact, MachineChargeIntent, ResourceRef, } from "./domain/types.js";
-export { assertMneeReceiversHaveNoPaymail, buildConnectPayBodyFromCharge, buildCreatePaymentRequestBodyFromCharge, destinationLooksLikePaymail, STANDARD_CHARGE_DENOMINATION_CURRENCY, } from "./domain/instruments.js";
+export type { CreatePaymentRequestBody } from "./domain/instruments.js";
+export { assertMneeReceiversHaveNoPaymail, buildConnectPayBodyFromCharge, buildCreatePaymentRequestBodyFromCharge, destinationLooksLikePaymail, normalizePaymentRequestDestinationForCloud, STANDARD_CHARGE_DENOMINATION_CURRENCY, } from "./domain/instruments.js";
 export { createChallengeId, hmacBindChallenge } from "./crypto/binding.js";
+export { assertMinMppSecretLength, DEFAULT_MIN_MPP_SECRET_LENGTH, } from "./crypto/secrets.js";
 export { buildPaymentRequiredBody, paymentRequiredResponse, type PaymentRequiredBody, } from "./http/payment-required.js";
 export { createHostedPayArtifact, type CreateHostedPayOptions } from "./adapters/hosted-pay.js";
 export { canonicalizeHandCashPaymentRequestUrl } from "./adapters/payment-request-url.js";

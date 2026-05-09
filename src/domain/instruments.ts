@@ -20,8 +20,9 @@ export type ChargeReceiver = {
   destination: string;
   /**
    * **Always in USD** (dollar amount, same mental model for BSV and MNEE).
-   * - **BSV instrument:** Cloud receives `denominationCurrencyCode: USD` and interprets `sendAmount` as a USD quote.
-   * - **MNEE instrument:** Cloud **does not** accept a denomination field; this value is sent as the numeric **MNEE** amount.
+   * - **BSV + hosted payment request:** Cloud field **`currency`** (e.g. `USD`) + `sendAmount` as USD quote.
+   * - **BSV + Connect.pay:** **`denominationCurrencyCode: USD`** (see {@link buildConnectPayBodyFromCharge}).
+   * - **MNEE instrument:** no denomination on payment requests; value is sent as **MNEE** amount.
    *   For HandCash’s USD-pegged MNEE instrument, use the **same USD price** as the figure you would pass for BSV-with-USD-denomination.
    *   If your peg or spread differs, convert USD→MNEE **before** building the charge.
    */
@@ -30,7 +31,21 @@ export type ChargeReceiver = {
 };
 
 /**
- * **BSV** settlement — Cloud gets `denominationCurrencyCode: 'USD'` from {@link buildCreatePaymentRequestBodyFromCharge} (fixed in this package).
+ * Strip a leading **`$`** so **`POST /v3/paymentRequests/`** uses plain handles per HandCash Pay docs
+ * (`destination` without `$`; {@link buildConnectPayBodyFromCharge} is unchanged).
+ * HandCash handles are treated as **case-insensitive** here (**lowercased**) except when the value looks like a **case-sensitive** on-chain address.
+ */
+export function normalizePaymentRequestDestinationForCloud(destination: string): string {
+  const s = destination.trim().replace(/^\$+/u, "");
+  if (!s) return s;
+  const looksLikeP2pkh = /^(1|3)[a-km-zA-HJ-NP-Z1-9]{24,33}$/.test(s);
+  const looksLikeBc1 = /^bc1[a-z0-9]+$/i.test(s);
+  if (looksLikeP2pkh || looksLikeBc1) return s;
+  return s.toLowerCase();
+}
+
+/**
+ * **BSV** settlement — hosted payment requests send **`currency: USD`** on Cloud (see {@link buildCreatePaymentRequestBodyFromCharge}).
  */
 export type ChargeSpecBsv = {
   instrumentCurrencyCode: "BSV";
@@ -60,7 +75,8 @@ export type ChargeSpec = ChargeSpecBsv | ChargeSpecMnee;
 export type CreatePaymentRequestBody =
   | {
       instrumentCurrencyCode: "BSV";
-      denominationCurrencyCode: typeof STANDARD_CHARGE_DENOMINATION_CURRENCY;
+      /** HandCash Cloud `POST /v3/paymentRequests/` — display / quote currency (not `denominationCurrencyCode`). */
+      currency: typeof STANDARD_CHARGE_DENOMINATION_CURRENCY;
       product: ChargeProduct;
       receivers: ChargeReceiver[];
     }
@@ -91,20 +107,24 @@ export function assertMneeReceiversHaveNoPaymail(receivers: ChargeReceiver[]): v
 /**
  * JSON body for HandCash Cloud **`POST /v3/paymentRequests/`** (hosted HandCash Pay).
  *
- * - **BSV:** always sends `denominationCurrencyCode: USD` so `sendAmount` is a **USD quote** (continuity with MNEE pricing).
- * - **MNEE:** **never** sends `denominationCurrencyCode` (forbidden by Cloud); `sendAmount` values are passed through as MNEE numerics (see {@link ChargeReceiver.sendAmount}).
+ * - **BSV:** sends **`currency: USD`** (HandCash Pay docs); `sendAmount` is a **USD quote**. Receiver destinations are plain handles (leading **`$`** stripped).
+ * - **MNEE:** **never** sends `currency` / denomination on the payment-request body; `sendAmount` values are passed through as MNEE numerics (see {@link ChargeReceiver.sendAmount}).
  */
 export function buildCreatePaymentRequestBodyFromCharge(charge: ChargeSpec): CreatePaymentRequestBody {
+  const receivers = charge.receivers.map((r) => ({
+    ...r,
+    destination: normalizePaymentRequestDestinationForCloud(r.destination),
+  }));
   const shared = {
     product: charge.product,
-    receivers: charge.receivers,
+    receivers,
   } as const;
 
   if (charge.instrumentCurrencyCode === "BSV") {
     return {
       ...shared,
       instrumentCurrencyCode: "BSV",
-      denominationCurrencyCode: STANDARD_CHARGE_DENOMINATION_CURRENCY,
+      currency: STANDARD_CHARGE_DENOMINATION_CURRENCY,
     };
   }
 

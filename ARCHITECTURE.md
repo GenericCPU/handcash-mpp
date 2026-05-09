@@ -89,11 +89,11 @@ HandCash exposes **two** on-chain instruments as `instrumentCurrencyCode`: **`BS
 
 | Surface | `instrumentCurrencyCode: 'BSV'` | `instrumentCurrencyCode: 'MNEE'` |
 |--------|-----------------------------------|-------------------------------------|
-| **`denominationCurrencyCode` on payment requests** | This package **always** sends **`USD`** so Cloud treats `sendAmount` as a **USD quote**. | **Forbidden** by Cloud — field is **omitted**. The same **USD price** numeric is sent as the **MNEE** amount (appropriate for USD-pegged MNEE; convert upstream if your pricing differs). |
-| **`denominationCurrencyCode` on `Connect.pay`** | Use **`USD`** with the same `sendAmount` semantics when you implement Connect (validator requires a denomination for BSV). | **Forbidden** — pass MNEE-side amounts per Cloud; keep **USD-priced** values in your app layer and convert if needed. |
+| **`POST /v3/paymentRequests/` body** | BSV: **`currency: USD`** (not `denominationCurrencyCode`), **`sendAmount`** as USD quote, **`receivers[].destination`** as plain handle (**`$`** stripped). | MNEE: no **`currency`** field; **`sendAmount`** as MNEE numeric. |
+| **`Connect.pay` body** | BSV: **`denominationCurrencyCode: USD`** with the same **`sendAmount`** semantics. | MNEE: **no** denomination — pass MNEE-side amounts per Cloud; keep **USD-priced** values in your app layer and convert if needed. |
 | **Paymail receivers (`destination` contains `@`)** | Allowed (BSV path). | **Rejected** for instrument sends — use **handle** or **P2PKH address** only. |
 
-This package encodes the payment-request half via **`buildCreatePaymentRequestBodyFromCharge`** (always `USD` for BSV; omits denomination for MNEE) and exposes **`assertMneeReceiversHaveNoPaymail`** for the Connect paymail rule. When you add the Connect adapter, call the assertion before `Connect.pay` for MNEE.
+This package encodes the payment-request half via **`buildCreatePaymentRequestBodyFromCharge`** (**`currency: USD`** for BSV; omits **`currency`** for MNEE) and exposes **`assertMneeReceiversHaveNoPaymail`** for the Connect paymail rule. When you add the Connect adapter, call the assertion before `Connect.pay` for MNEE.
 
 ### 4.E — **HandCash Pay (hosted) vs Connect — comparison**
 

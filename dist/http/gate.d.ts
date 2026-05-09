@@ -3,9 +3,7 @@ import { type VerifiedReceipt } from "../receipts/jwt.js";
 import type { MemoryJwtReplayGuard } from "../receipts/replay-guard.js";
 export declare const DEFAULT_RECEIPT_HEADER = "x-handcash-receipt";
 /**
- * Reads a machine-pay receipt candidate: prefers the explicit receipt header so the same request can use
- * `Authorization: Bearer …` for another credential (e.g. HandCash Connect) without colliding with receipt detection.
- * Does not verify the token — callers that need disambiguation should use {@link evaluateMachinePaymentGate}.
+ * Reads a bearer or raw JWT from `Authorization: Bearer …` or a custom header.
  */
 export declare function readReceiptTokenFromRequest(request: Request, headerName?: string): string | null;
 export type MachineGateResult = {

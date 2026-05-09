@@ -4,14 +4,23 @@ import { assertMneeReceiversHaveNoPaymail, buildConnectPayBodyFromCharge, buildC
 const product = { name: "Test" };
 const receivers = [{ destination: "alice", sendAmount: 1.5 }];
 describe("instruments", () => {
-    it("payment request BSV always uses USD denomination", () => {
+    it("payment request BSV uses currency USD (not denominationCurrencyCode)", () => {
         const body = buildCreatePaymentRequestBodyFromCharge({
             instrumentCurrencyCode: "BSV",
             receivers,
             product,
         });
         assert.equal(body.instrumentCurrencyCode, "BSV");
-        assert.equal(body.denominationCurrencyCode, STANDARD_CHARGE_DENOMINATION_CURRENCY);
+        assert.equal(body.currency, STANDARD_CHARGE_DENOMINATION_CURRENCY);
+        assert.equal("denominationCurrencyCode" in body, false);
+    });
+    it("payment request BSV strips leading dollar from receiver destination", () => {
+        const body = buildCreatePaymentRequestBodyFromCharge({
+            instrumentCurrencyCode: "BSV",
+            receivers: [{ destination: "$Alice", sendAmount: 2 }],
+            product,
+        });
+        assert.equal(body.receivers[0]?.destination, "alice");
     });
     it("payment request MNEE omits denomination", () => {
         const body = buildCreatePaymentRequestBodyFromCharge({

@@ -21,6 +21,7 @@ export {
   buildConnectPayBodyFromCharge,
   buildCreatePaymentRequestBodyFromCharge,
   destinationLooksLikePaymail,
+  normalizePaymentRequestDestinationForCloud,
   STANDARD_CHARGE_DENOMINATION_CURRENCY,
 } from "./domain/instruments.js";
 export { createChallengeId, hmacBindChallenge } from "./crypto/binding.js";

@@ -8,6 +8,8 @@ import type { ChargeSpec } from "../domain/types.js";
 import type { HostedPayArtifact } from "../domain/types.js";
 
 type CreatePaymentRequestHttpBody = CreatePaymentRequestBody & {
+  /** Required by HandCash Cloud for `POST /v3/paymentRequests/`. */
+  expirationType: "never" | "limit" | "onPaymentCompleted";
   requestedUserData?: Array<"paymail" | "email" | "phoneNumber">;
   paymentMethods?: Array<"onChain" | "externalPaymentProcessor">;
   redirectUrl?: string;
@@ -46,6 +48,7 @@ export async function createHostedPayArtifact(
   opts: CreateHostedPayOptions,
 ): Promise<{ data: HostedPayArtifact | null; error: { message: string } | null }> {
   const body: CreatePaymentRequestHttpBody = {
+    expirationType: "never",
     ...buildCreatePaymentRequestBodyFromCharge(opts.charge),
     ...(opts.requestedUserData ? { requestedUserData: opts.requestedUserData } : {}),
     ...(opts.paymentMethods ? { paymentMethods: opts.paymentMethods } : {}),

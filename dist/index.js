@@ -3,8 +3,9 @@
  * HandCash Machine Payments — HTTP 402, HandCash Pay, Connect.pay, receipt JWTs, webhook verification,
  * and paid-route helpers on Bitcoin SV via `@handcash/sdk`. See ARCHITECTURE.md for the full system design.
  */
-export { assertMneeReceiversHaveNoPaymail, buildConnectPayBodyFromCharge, buildCreatePaymentRequestBodyFromCharge, destinationLooksLikePaymail, STANDARD_CHARGE_DENOMINATION_CURRENCY, } from "./domain/instruments.js";
+export { assertMneeReceiversHaveNoPaymail, buildConnectPayBodyFromCharge, buildCreatePaymentRequestBodyFromCharge, destinationLooksLikePaymail, normalizePaymentRequestDestinationForCloud, STANDARD_CHARGE_DENOMINATION_CURRENCY, } from "./domain/instruments.js";
 export { createChallengeId, hmacBindChallenge } from "./crypto/binding.js";
+export { assertMinMppSecretLength, DEFAULT_MIN_MPP_SECRET_LENGTH, } from "./crypto/secrets.js";
 export { buildPaymentRequiredBody, paymentRequiredResponse, } from "./http/payment-required.js";
 export { createHostedPayArtifact } from "./adapters/hosted-pay.js";
 export { canonicalizeHandCashPaymentRequestUrl } from "./adapters/payment-request-url.js";

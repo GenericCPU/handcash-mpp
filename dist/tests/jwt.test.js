@@ -41,47 +41,5 @@ describe("receipt jwt", () => {
         assert.equal(g2.ok, false);
         assert.equal(g2.reason, "replay");
     });
-    it("accepts receipt JWT only in Authorization when it verifies", async () => {
-        const secret = "another-test-secret-32-characters-min";
-        const jwt = await issueReceiptJwt(secret, { challengeId: "c2", resourceMethod: "POST", resourcePath: "/x" }, 3600);
-        const req = new Request("https://example.com/x", {
-            headers: { Authorization: `Bearer ${jwt}` },
-            method: "POST",
-        });
-        const g = await evaluateMachinePaymentGate(req, {
-            receiptSecret: secret,
-            resource: { method: "POST", path: "/x" },
-        });
-        assert.equal(g.ok, true);
-    });
-    it("does not treat non-receipt Bearer as receipt (e.g. Connect credential)", async () => {
-        const secret = "another-test-secret-32-characters-min";
-        const req = new Request("https://example.com/x", {
-            headers: { Authorization: "Bearer not-a-receipt-jwt-at-all" },
-            method: "POST",
-        });
-        const g = await evaluateMachinePaymentGate(req, {
-            receiptSecret: secret,
-            resource: { method: "POST", path: "/x" },
-        });
-        assert.equal(g.ok, false);
-        assert.equal(g.reason, "missing_token");
-    });
-    it("prefers x-handcash-receipt over Authorization when both present", async () => {
-        const secret = "another-test-secret-32-characters-min";
-        const good = await issueReceiptJwt(secret, { challengeId: "c3", resourceMethod: "POST", resourcePath: "/x" }, 3600);
-        const req = new Request("https://example.com/x", {
-            headers: {
-                "x-handcash-receipt": good,
-                Authorization: "Bearer not-a-receipt-jwt-at-all",
-            },
-            method: "POST",
-        });
-        const g = await evaluateMachinePaymentGate(req, {
-            receiptSecret: secret,
-            resource: { method: "POST", path: "/x" },
-        });
-        assert.equal(g.ok, true);
-    });
 });
 //# sourceMappingURL=jwt.test.js.map
