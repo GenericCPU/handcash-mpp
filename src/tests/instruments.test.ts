@@ -11,15 +11,15 @@ const product = { name: "Test" };
 const receivers = [{ destination: "alice", sendAmount: 1.5 }];
 
 describe("instruments", () => {
-  it("payment request BSV uses currency USD (not denominationCurrencyCode)", () => {
+  it("payment request BSV uses denominationCurrencyCode USD (Cloud rejects top-level currency)", () => {
     const body = buildCreatePaymentRequestBodyFromCharge({
       instrumentCurrencyCode: "BSV",
       receivers,
       product,
     });
     assert.equal(body.instrumentCurrencyCode, "BSV");
-    assert.equal(body.currency, STANDARD_CHARGE_DENOMINATION_CURRENCY);
-    assert.equal("denominationCurrencyCode" in body, false);
+    assert.equal(body.denominationCurrencyCode, STANDARD_CHARGE_DENOMINATION_CURRENCY);
+    assert.equal("currency" in body, false);
   });
 
   it("payment request BSV strips leading dollar from receiver destination", () => {

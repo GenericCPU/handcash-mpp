@@ -35,8 +35,8 @@ export function assertMneeReceiversHaveNoPaymail(receivers) {
 /**
  * JSON body for HandCash Cloud **`POST /v3/paymentRequests/`** (hosted HandCash Pay).
  *
- * - **BSV:** sends **`currency: USD`** (HandCash Pay docs); `sendAmount` is a **USD quote**. Receiver destinations are plain handles (leading **`$`** stripped).
- * - **MNEE:** **never** sends `currency` / denomination on the payment-request body; `sendAmount` values are passed through as MNEE numerics (see {@link ChargeReceiver.sendAmount}).
+ * - **BSV:** sends **`denominationCurrencyCode: USD`**; `sendAmount` is a **USD quote**. Receiver destinations are plain handles (leading **`$`** stripped).
+ * - **MNEE:** **never** sends denomination on the payment-request body; `sendAmount` values are passed through as MNEE numerics (see {@link ChargeReceiver.sendAmount}).
  */
 export function buildCreatePaymentRequestBodyFromCharge(charge) {
     const receivers = charge.receivers.map((r) => ({
@@ -51,7 +51,7 @@ export function buildCreatePaymentRequestBodyFromCharge(charge) {
         return {
             ...shared,
             instrumentCurrencyCode: "BSV",
-            currency: STANDARD_CHARGE_DENOMINATION_CURRENCY,
+            denominationCurrencyCode: STANDARD_CHARGE_DENOMINATION_CURRENCY,
         };
     }
     return {

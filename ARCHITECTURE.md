@@ -89,11 +89,11 @@ HandCash exposes **two** on-chain instruments as `instrumentCurrencyCode`: **`BS
 
 | Surface | `instrumentCurrencyCode: 'BSV'` | `instrumentCurrencyCode: 'MNEE'` |
 |--------|-----------------------------------|-------------------------------------|
-| **`POST /v3/paymentRequests/` body** | BSV: **`currency: USD`** (not `denominationCurrencyCode`), **`sendAmount`** as USD quote, **`receivers[].destination`** as plain handle (**`$`** stripped). | MNEE: no **`currency`** field; **`sendAmount`** as MNEE numeric. |
+| **`POST /v3/paymentRequests/` body** | BSV: **`denominationCurrencyCode: USD`**, **`sendAmount`** as USD quote, **`receivers[].destination`** as plain handle (**`$`** stripped). Top-level **`currency`** is rejected by live Cloud. | MNEE: no denomination field; **`sendAmount`** as MNEE numeric. |
 | **`Connect.pay` body** | BSV: **`denominationCurrencyCode: USD`** with the same **`sendAmount`** semantics. | MNEE: **no** denomination — pass MNEE-side amounts per Cloud; keep **USD-priced** values in your app layer and convert if needed. |
 | **Paymail receivers (`destination` contains `@`)** | Allowed (BSV path). | **Rejected** for instrument sends — use **handle** or **P2PKH address** only. |
 
-This package encodes the payment-request half via **`buildCreatePaymentRequestBodyFromCharge`** (**`currency: USD`** for BSV; omits **`currency`** for MNEE) and exposes **`assertMneeReceiversHaveNoPaymail`** for the Connect paymail rule. When you add the Connect adapter, call the assertion before `Connect.pay` for MNEE.
+This package encodes the payment-request half via **`buildCreatePaymentRequestBodyFromCharge`** (**`denominationCurrencyCode: USD`** for BSV; omits it for MNEE) and exposes **`assertMneeReceiversHaveNoPaymail`** for the Connect paymail rule. When you add the Connect adapter, call the assertion before `Connect.pay` for MNEE.
 
 ### 4.E — **HandCash Pay (hosted) vs Connect — comparison**
 
